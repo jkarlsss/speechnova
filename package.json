@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "node scripts/patch-prisma-studio.mjs"
+    "postinstall": "node scripts/patch-prisma-studio.mjs && prisma generate"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
