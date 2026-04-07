@@ -139,11 +139,11 @@ export function DashboardSidebar() {
         >
           <Image
             src={"/logo.svg"}
-            alt="SpeecgNova"
+            alt="SpeechNova"
             width={24}
             height={24}
             className="rounded-sm"
-          />
+          />{" "}
           <span
             className="group-data-[collapsible=icon]:hidden
           font-semibold text-lg tracking-tighter text-foreground"

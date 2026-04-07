@@ -4,9 +4,9 @@ import { Coins } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Badge } from "../../../components/ui/badge";
+import { Button } from "../../../components/ui/button";
 import { Textarea } from "../../../components/ui/textarea";
 import { TEXT_MAX_LENGTH } from "../../text-to-speech/data/constants";
-import { Button } from "../../../components/ui/button";
 
 export default function TextInputPanel() {
   const [text, setText] = useState("");
@@ -24,7 +24,7 @@ export default function TextInputPanel() {
     <div
       className="
       rounded-[22px] bg-linear-185 from-[#ff8ee3] 
-      from-15% via-[##57d7e0] via-39% to-[#dbf1f2] to-85%
+      from-15% via-[#57d7e0] via-39% to-[#dbf1f2] to-85%
       p-0.5 shadow-[0_0_0_4px_white]
     "
     >
@@ -55,18 +55,19 @@ export default function TextInputPanel() {
               </span>
             </Badge>
             <span className="text-xs text-muted-foreground">
-              {text.length.toLocaleString()} / {TEXT_MAX_LENGTH.toLocaleString()}
+              {text.length.toLocaleString()} /{" "}
+              {TEXT_MAX_LENGTH.toLocaleString()}
             </span>
           </div>
         </div>
 
         {/* Action bar */}
         <div className="flex items-center justify-end p-3">
-          <Button 
-          className="w-full lg:w-auto"
-          disabled={!text.trim()}
-          onClick={handleGenerate}
-          size={"sm"}
+          <Button
+            className="w-full lg:w-auto"
+            disabled={!text.trim()}
+            onClick={handleGenerate}
+            size={"sm"}
           >
             Generate speech
           </Button>
