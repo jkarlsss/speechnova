@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   title: {
     default: "SpeechNova", template: "%s | SpeechNova"
   },
-  description: "Ai Speech Generator",
+  description: "AI Speech Generator",
 };
 
 export default function RootLayout({
