@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-var */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";

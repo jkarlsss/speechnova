@@ -1,7 +1,7 @@
-import DashboardView from "../../features/views/dashboard-view"
+import DashboardView from "../../features/dashboard/views/dashboard-view";
 
 const Page = () => {
-  return <DashboardView /> 
-}
+  return <DashboardView />;
+};
 
-export default Page
+export default Page;
