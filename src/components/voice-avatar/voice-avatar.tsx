@@ -15,10 +15,10 @@ export function VoiceAvatar({ seed, name, className }: VoiceAvatarProps) {
 
   return (
     <Avatar className={cn("size-4 border-white shadow-xs", className)}>
-      <AvatarImage src={avatarUrl} alt={name} />
+      <AvatarImage src={avatarUrl} alt={name || "Avatar"} />
       <AvatarFallback className="text-[8px]">
-        {name.slice(0, 2).toUpperCase()}
-      </AvatarFallback>
+        {name ? name.slice(0, 2).toUpperCase() : "?"}
+      </AvatarFallback>{" "}
     </Avatar>
   );
 }
