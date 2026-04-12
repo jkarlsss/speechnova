@@ -53,7 +53,7 @@ export const voicesRouter = createTRPCRouter({
             variant: "SYSTEM",
             ...searchFilter,
           },
-          orderBy: { name: "desc" },
+          orderBy: { name: "asc" },
           select: {
             id: true,
             name: true,
