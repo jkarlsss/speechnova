@@ -19,6 +19,7 @@
     "@dicebear/core": "^9.4.2",
     "@prisma/adapter-pg": "^7.6.0",
     "@prisma/client": "^7.6.0",
+    "@sentry/nextjs": "^10.48.0",
     "@t3-oss/env-nextjs": "^0.13.11",
     "@tanstack/react-form": "^1.28.6",
     "@tanstack/react-query": "^5.96.2",
