@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+import { toast } from "sonner";
 import { Button } from "../../../components/ui/button";
 import {
   Dialog,
@@ -18,6 +20,7 @@ import {
   DrawerTrigger,
 } from "../../../components/ui/drawer";
 import { useIsMobile } from "../../../hooks/use-mobile";
+import { useCheckout } from "../../billing/hooks/use-checkout";
 import { VoiceCreateForm } from "./voice-create-form";
 
 interface VoiceCreateDialogProps {
@@ -33,6 +36,21 @@ export function VoiceCreateDialog({
 }: VoiceCreateDialogProps) {
   const isMobile = useIsMobile();
 
+  const { checkout } = useCheckout();
+
+  const handleError = useCallback((message: string) => {
+    if (message === "SUBSCRIPTION_REQUIRED") {
+      toast.error("Subscription required", {
+        action: {
+          label: "Subscribe",
+          onClick: () => checkout(),
+        },
+      });
+    } else {
+      toast.error(message);
+    }
+  }, [checkout]);
+
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
@@ -47,6 +65,7 @@ export function VoiceCreateDialog({
           </DrawerHeader>
           <VoiceCreateForm
             scrollable
+            onError={handleError}
             footer={(submit) => (
               <DrawerFooter>
                 {submit}
@@ -72,9 +91,7 @@ export function VoiceCreateDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <VoiceCreateForm
-          scrollable
-        />
+        <VoiceCreateForm onError={handleError} />
       </DialogContent>
     </Dialog>
   );
