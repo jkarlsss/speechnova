@@ -18,8 +18,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "SpeechNova", template: "%s | SpeechNova"
+    default: "SpeechNova", template: "%s | SpeechNova",
   },
+  icons: "/logo.svg",
   description: "AI Speech Generator",
 };
 
