@@ -5,6 +5,7 @@ import { VoiceCategory } from "../../../../generated/prisma/enums";
 import { parseBuffer } from "music-metadata";
 import { uploadAudio } from "../../../../lib/r2";
 import { prisma } from "../../../../lib/db";
+import { polar } from "../../../../lib/polar";
 
 const createVoiceSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -21,6 +22,24 @@ export async function POST(request: Request) {
 
   if (!userId || !orgId) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Check for active subscriptions before creating a voice
+  try {
+    const customerState = await polar.customers.getStateExternal({
+      externalId: orgId,
+    });
+
+    const hasActiveSubscription =
+      (customerState.activeSubscriptions ?? []).length > 0;
+
+    if (!hasActiveSubscription) {
+      throw Response.json({
+        error: "SUBSCRIPTION_REQUIRED",
+      }, { status: 403 });
+    }
+  } catch {
+    return Response.json({ error: "SUBSCRIPTION_REQUIRED" }, { status: 403 });
   }
 
   const url = new URL(request.url);
@@ -107,6 +126,18 @@ export async function POST(request: Request) {
 
     return Response.json({ error: "Failed to create voice" }, { status: 500 });
   }
+
+  // Ingest usage eventto Polar (fire-and-forget, don't block response)
+  polar.events.ingest({
+    events: [
+      {
+        name: "voice_creation",
+        externalCustomerId: orgId,
+        metadata: {},
+        timestamp: new Date(),
+      }
+    ]
+  }).catch(() => {});
 
   return Response.json({ name, message: "Voice created" },
     { status: 200 },
