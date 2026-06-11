@@ -3,6 +3,7 @@ import z from "zod";
 import { TEXT_MAX_LENGTH } from "../../features/text-to-speech/data/constants";
 import { chatterbox } from "../../lib/chatterbox-client";
 import { prisma } from "../../lib/db";
+import { polar } from "../../lib/polar";
 import { uploadAudio } from "../../lib/r2";
 import { createTRPCRouter, orgProcedure } from "../init";
 
@@ -56,34 +57,39 @@ export const generationRouter = createTRPCRouter({
   create: orgProcedure
     .input(
       z.object({
-        text: z
-          .string()
-          .min(1)
-          .max(TEXT_MAX_LENGTH),
+        text: z.string().min(1).max(TEXT_MAX_LENGTH),
         voiceId: z.string().min(1),
-        temperature: z
-          .number()
-          .min(0)
-          .max(2)
-          .default(0.8),
-        topP: z
-          .number()
-          .min(0)
-          .max(1)
-          .default(0.95),
-        topK: z
-          .number()
-          .min(0)
-          .max(10000)
-          .default(1000),
-        repetitionPenalty: z
-          .number()
-          .min(1)
-          .max(2)
-          .default(1.2),
+        temperature: z.number().min(0).max(2).default(0.8),
+        topP: z.number().min(0).max(1).default(0.95),
+        topK: z.number().min(0).max(10000).default(1000),
+        repetitionPenalty: z.number().min(1).max(2).default(1.2),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      // Check for active subscriptions before generations
+      try {
+        const customerState = await polar.customers.getStateExternal({
+          externalId: ctx.orgId,
+        });
+
+        const hasActiveSubscription =
+          (customerState.activeSubscriptions ?? []).length > 0;
+
+        if (!hasActiveSubscription) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "SUBSCRIPTION_REQUIRED",
+          });
+        }
+      } catch (error) {
+        if (error instanceof TRPCError) throw error;
+
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "SUBSCRIPTION_REQUIRED",
+        });
+      }
+
       const voice = await prisma.voice.findUnique({
         where: {
           id: input.voiceId,
@@ -181,14 +187,14 @@ export const generationRouter = createTRPCRouter({
           },
         });
       } catch (error) {
-
         if (generationId) {
-          await prisma.generation.delete({
-            where: {
-              id: generationId,
-            },
-          })
-          .catch(() => {});
+          await prisma.generation
+            .delete({
+              where: {
+                id: generationId,
+              },
+            })
+            .catch(() => {});
         }
 
         console.error("Error creating generation:", error);
@@ -203,10 +209,22 @@ export const generationRouter = createTRPCRouter({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create generation.",
         });
-      };
+      }
+
+      // Ingest usage eventto Polar (fire-and-forget, don't block response)
+      polar.events.ingest({
+        events: [
+          {
+            name: "tts_generaion",
+            externalCustomerId: ctx.orgId,
+            metadata: { characters: input.text.length },
+            timestamp: new Date(),
+          }
+        ]
+      }).catch(() => {});
 
       return {
         id: generationId,
-      }
+      };
     }),
 });
